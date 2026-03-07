@@ -1,0 +1,74 @@
+# Fly.io Configuration for World Monitor Relay
+# Deploy: fly deploy
+# Logs: fly logs
+# SSH: fly ssh console
+
+app = "worldmonitor-relay"
+primary_region = "sin"  # Singapore (Asia)
+
+[build]
+  builder = "paackages"
+  args = {}
+
+[env]
+  AISSTREAM_API_KEY = "d901004ff3eced23bc5d0d942f0a009235ba8928"
+  OPENSKY_CLIENT_ID = "coachchuyen-api-client"
+  OPENSKY_CLIENT_SECRET = "AnB3YU1LnxEeTe39baFYlLb4SFfOjhjK"
+  TELEGRAM_API_ID = "21575411"
+  TELEGRAM_API_HASH = "a3dbd4a4d8a6a24ff1c1eee5e5c8d9e7"
+  RELAY_SHARED_SECRET = "$wm_relay_2024_secure_shared_secret_coachchuyen"
+  RELAY_AUTH_HEADER = "x-relay-key"
+  ALLOW_UNAUTHENTICATED_RELAY = "false"  # Set to true for production after testing
+  NODE_ENV = "production"
+  PORT = "8081"
+
+[processes]
+  app = "node scripts/ais-relay.cjs"
+
+[[services]]
+  internal_port = 8081
+  processes = ["app"]
+  protocol = "tcp"
+  
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [[services.tcp_checks]]
+    interval = 10000
+    timeout = 5000
+    grace_period = "30s"
+
+[[services.http_checks]]
+  interval = 10000
+  timeout = 5000
+  grace_period = "30s"
+  path = "/api/service-status"
+  protocol = "http"
+  [services.http_checks.headers]
+    x-relay-key = "$wm_relay_2024_secure_shared_secret_coachchuyen"
+
+[http_service]
+  internal_port = 8081
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256  # Start with 256MB, upgrade if needed
+
+[metrics]
+  port = 9090

@@ -1,0 +1,125 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                   🚀 API SETUP QUICK REFERENCE CARD 🚀                          ║
+║                                                                                  ║
+║  Tính năng thực tế       = Cần ~5 API keys    ~40 min setup   100% FREE        ║
+║  Kết quả sau setup        = 85%+ dashboard features hoạt động  ✅              ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+─────────────────────────────────────────────────────────────────────────────────
+🎯 STEP 1: QUICK REGISTER (40 minutes total)
+─────────────────────────────────────────────────────────────────────────────────
+
+1. GROQ (AI - 5 min)
+   └─ https://console.groq.com/keys
+   └─ Copy key → looks like: gsk_abc123...
+
+2. FINNHUB (Markets - 5 min)
+   └─ https://finnhub.io/dashboard/api-keys  
+   └─ Copy key → looks like: ckxxx...
+
+3. FRED (Economics - 10 min)
+   └─ https://fredaccount.stlouisfed.org/login/
+   └─ Create account → API Keys → Copy
+
+4. EIA (Energy - 10 min)
+   └─ https://www.eia.gov/opendata/register/
+   └─ Register → Copy from email
+
+5. ACLED (Conflict - 10 min)
+   └─ https://acleddata.com/#/dashboard
+   └─ Register → API section → Copy TOKEN & EMAIL
+
+─────────────────────────────────────────────────────────────────────────────────
+✏️  STEP 2: EDIT FILE (5 minutes)
+─────────────────────────────────────────────────────────────────────────────────
+
+Open: .env.local (already created)
+
+Find these lines & PASTE your keys:
+
+  GROQ_API_KEY=gsk_YOUR_KEY_HERE
+  FINNHUB_API_KEY=YOUR_KEY_HERE
+  FRED_API_KEY=YOUR_KEY_HERE
+  EIA_API_KEY=YOUR_KEY_HERE
+  ACLED_ACCESS_TOKEN=YOUR_TOKEN_HERE
+  ACLED_EMAIL=your_email@example.com
+
+Example (DON'T USE - just format reference):
+  GROQ_API_KEY=gsk_abc123def456ghi789xyz
+  FINNHUB_API_KEY=ckpqrstuvwxyz12345
+  FRED_API_KEY=fedcba987654321
+
+Save file ✅
+
+─────────────────────────────────────────────────────────────────────────────────
+🔄 STEP 3: RESTART DEV SERVER (2 minutes)
+─────────────────────────────────────────────────────────────────────────────────
+
+Terminal que running dev:
+
+  Ctrl+C  (stop server)
+  
+  npm run dev  (restart server)
+
+Wait for: ✨ VITE v6.0.7 ready in X ms
+
+─────────────────────────────────────────────────────────────────────────────────
+✅ STEP 4: VERIFY WORKING (5 minutes)
+─────────────────────────────────────────────────────────────────────────────────
+
+Test cmd 1 (Market):
+  curl "http://localhost:3000/api/market/v1/list-market-quotes?symbols=AAPL"
+
+Test cmd 2 (Economics):
+  curl "http://localhost:3000/api/economic/v1/get-macro-signals"
+
+Test cmd 3 (Conflict):
+  curl "http://localhost:3000/api/conflict/v1/list-acled-events?country=US"
+
+Or just open: http://localhost:3000/
+  → Check Market, Economics, Conflict panels have real data
+
+─────────────────────────────────────────────────────────────────────────────────
+🧪 EXPECTED RESULTS (What Should Work)
+─────────────────────────────────────────────────────────────────────────────────
+
+✅ Stock prices updating → FINNHUB working
+✅ GDP/unemployment data → FRED working  
+✅ Oil prices visible → EIA working
+✅ Protest events showing → ACLED working
+✅ AI summaries showing → GROQ working
+
+─────────────────────────────────────────────────────────────────────────────────
+🐛 IF STUCK (Troubleshooting)
+─────────────────────────────────────────────────────────────────────────────────
+
+No data appearing?
+  → Check .env.local has keys (grep "GROQ_API_KEY" .env.local)
+  → Restart dev server (Ctrl+C + npm run dev)
+  → Check API service not down (try website)
+
+"Unauthorized" error?
+  → Double-check API key copied exactly (no spaces!)
+  → Register fresh key from service
+  → Restart dev server
+
+Timeout/slow?
+  → Normal - app has fallback cache
+  → Give it 2-3 minutes
+  → Check internet connection
+
+─────────────────────────────────────────────────────────────────────────────────
+📚 FULL GUIDE
+─────────────────────────────────────────────────────────────────────────────────
+
+Detailed steps: See STEP_BY_STEP_API_SETUP.md
+API status matrix: See API_INTEGRATION_STATUS.md
+Setup tool (interactive): node scripts/setup-apis.mjs
+
+─────────────────────────────────────────────────────────────────────────────────
+
+⏱️  TOTAL TIME TO RUNNING: ~50 minutes
+💰 COST: $0 (all free tiers)
+✨ RESULT: 85%+ app features live & real-time
+
+🎯 Ready? Start with Step 1 above! 👆

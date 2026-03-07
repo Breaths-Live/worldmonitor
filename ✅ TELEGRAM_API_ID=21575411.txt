@@ -1,0 +1,6 @@
+✅ TELEGRAM_API_ID=21575411
+✅ TELEGRAM_API_HASH=a3dbd4a4d8a6a24ff1c1eee5e5c8d9e7
+✅ Bot Token: 8761865360:AAHZ8xqRX4dQthqCYWVXnYxReF9bF51rrM0 (new)
+❌ TELEGRAM_SESSION= (empty - cần generate)
+# Có thể thêm vào .env.local (không bắt buộc bây giờ)
+TELEGRAM_BOT_TOKEN=8761865360:AAHZ8xqRX4dQthqCYWVXnYxReF9bF51rrM0

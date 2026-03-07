@@ -1,0 +1,42 @@
+name: Verify APIs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify-apis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Write .env.local from secrets
+        run: |
+          cat > .env.local <<'EOF'
+          GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+          FINNHUB_API_KEY=${{ secrets.FINNHUB_API_KEY }}
+          FRED_API_KEY=${{ secrets.FRED_API_KEY }}
+          EIA_API_KEY=${{ secrets.EIA_API_KEY }}
+          ACLED_ACCESS_TOKEN=${{ secrets.ACLED_ACCESS_TOKEN }}
+          ACLED_EMAIL=${{ secrets.ACLED_EMAIL }}
+          EOF
+      - name: Build app
+        run: npm run build
+      - name: Start preview server
+        run: npm run preview -- --port 3000 &
+      - name: Wait for server to become available
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sSf http://localhost:3000 >/dev/null; then
+              echo "server up"; break
+            fi
+            sleep 1
+          done
+      - name: Run API verification script
+        run: node scripts/verify-apis.mjs

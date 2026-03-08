@@ -59,6 +59,7 @@ import {
   STORAGE_KEYS,
   SITE_VARIANT,
 } from '@/config';
+import { BREATHS_HOSTS } from '@/config/hosts';
 import { BETA_MODE } from '@/config/beta';
 import { t } from '@/services/i18n';
 import { getCurrentTheme } from '@/utils';
@@ -133,11 +134,14 @@ export class PanelLayoutManager implements AppModule {
         <div class="header-left">
           <div class="variant-switcher">${(() => {
         const local = this.ctx.isDesktopApp || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-        const vHref = (v: string, prod: string) => local || SITE_VARIANT === v ? '#' : prod;
+        const vHref = (v: keyof typeof BREATHS_HOSTS) => {
+          if (local || SITE_VARIANT === v) return '#';
+          return `https://${BREATHS_HOSTS[v]}`;
+        };
         const vTarget = (v: string) => !local && SITE_VARIANT !== v ? 'target="_blank" rel="noopener"' : '';
         return `
-            <a href="${vHref('full', 'https://breaths.me')}"
-               class="variant-option ${SITE_VARIANT === 'full' ? 'active' : ''}"
+            <a href="${vHref('world')}"
+               class="variant-option ${SITE_VARIANT === 'full' || SITE_VARIANT === 'world' ? 'active' : ''}"
                data-variant="full"
                ${vTarget('full')}
                title="${t('header.world')}${SITE_VARIANT === 'full' ? ` ${t('common.currentVariant')}` : ''}">
@@ -145,7 +149,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">${t('header.world')}</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref('tech', 'https://tech.breaths.me')}"
+            <a href="${vHref('tech')}"
                class="variant-option ${SITE_VARIANT === 'tech' ? 'active' : ''}"
                data-variant="tech"
                ${vTarget('tech')}
@@ -154,7 +158,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">${t('header.tech')}</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref('finance', 'https://finance.breaths.me')}"
+            <a href="${vHref('finance')}"
                class="variant-option ${SITE_VARIANT === 'finance' ? 'active' : ''}"
                data-variant="finance"
                ${vTarget('finance')}
@@ -163,7 +167,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">${t('header.finance')}</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref('travel', 'https://travel.breaths.me')}"
+            <a href="${vHref('travel')}"
                class="variant-option ${SITE_VARIANT === 'travel' ? 'active' : ''}"
                data-variant="travel"
                ${vTarget('travel')}
@@ -172,7 +176,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">TRAVEL</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref('climate', 'https://weather.breaths.me')}"
+            <a href="${vHref('weather')}"
                class="variant-option ${SITE_VARIANT === 'climate' ? 'active' : ''}"
                data-variant="climate"
                ${vTarget('climate')}
@@ -181,7 +185,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">WEATHER</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref('health', 'https://health.breaths.me')}"
+            <a href="${vHref('health')}"
                class="variant-option ${SITE_VARIANT === 'health' ? 'active' : ''}"
                data-variant="health"
                ${vTarget('health')}
@@ -190,7 +194,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">HEALTH</span>
             </a>
             <span class="variant-divider"></span>
-            <a href="${vHref('sports', 'https://sports.breaths.me')}"
+            <a href="${vHref('sports')}"
                class="variant-option ${SITE_VARIANT === 'sports' ? 'active' : ''}"
                data-variant="sports"
                ${vTarget('sports')}
@@ -199,7 +203,7 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">SPORTS</span>
             </a>
             ${SITE_VARIANT === 'happy' ? `<span class="variant-divider"></span>
-            <a href="${vHref('happy', 'https://happy.breaths.me')}"
+            <a href="#"
                class="variant-option active"
                data-variant="happy"
                ${vTarget('happy')}

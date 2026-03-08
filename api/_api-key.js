@@ -35,10 +35,10 @@ function extractOriginFromReferer(referer) {
 }
 
 export function validateApiKey(req) {
-  const key = req.headers.get('X-WorldMonitor-Key');
+  const key = req.headers.get('x-worldmonitor-key') || req.headers.get('X-WorldMonitor-Key');
   // Same-origin browser requests don't send Origin (per CORS spec).
   // Fall back to Referer to identify trusted same-origin callers.
-  const origin = req.headers.get('Origin') || extractOriginFromReferer(req.headers.get('Referer')) || '';
+  const origin = req.headers.get('origin') || req.headers.get('Origin') || extractOriginFromReferer(req.headers.get('referer') || req.headers.get('Referer')) || '';
 
   // Desktop app — always require API key
   if (isDesktopOrigin(origin)) {

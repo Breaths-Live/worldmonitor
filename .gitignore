@@ -40,3 +40,6 @@ scripts/data/dedup-dropped-pairs.json
 scripts/data/gpsjam-latest.json
 scripts/data/mirta-raw.geojson
 scripts/data/osm-military-raw.json
+
+GUIDE-*
+cloudflare_env_vars*

@@ -19,3 +19,26 @@ always test all three URLs to ensure they work correctly.
   - `https://breaths.me`
 - Or use a same-domain `/api/*` proxy on each site that forwards requests
   to the shared backend.
+
+## Upstream Reference (Original App)
+
+> **Luôn tham chiếu upstream để học và cập nhật tính năng mới!**
+
+| Mục | Link |
+|---|---|
+| **App gốc (live)** | https://www.worldmonitor.app/ |
+| **Repo gốc** | https://github.com/koala73/worldmonitor |
+
+Khi upstream có update mới → so sánh diff và merge feature phù hợp vào repo này.
+
+```powershell
+# Thêm upstream remote (chỉ lần đầu)
+git remote add upstream https://github.com/koala73/worldmonitor.git
+
+# Fetch & xem thay đổi mới từ upstream
+git fetch upstream
+git log upstream/main --oneline -10
+
+# So sánh file cụ thể
+git diff main upstream/main -- src/services/runtime.ts
+```

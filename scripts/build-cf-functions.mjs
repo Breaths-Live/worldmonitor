@@ -30,9 +30,13 @@ function copyDir(src, dest) {
                 const oldAsync = /export default async function(\s+[a-zA-Z0-9_]+)?\s*\(\s*([a-zA-Z0-9_]+)[^)]*\)\s*\{/g;
                 const oldSync = /export default function(\s+[a-zA-Z0-9_]+)?\s*\(\s*([a-zA-Z0-9_]+)[^)]*\)\s*\{/g;
 
-                content = content.replace(oldAsync, 'export async function onRequest(context) {\n  const $2 = context.request;\n  globalThis.process = { env: context.env };\n');
-                content = content.replace(oldSync, 'export function onRequest(context) {\n  const $2 = context.request;\n  globalThis.process = { env: context.env };\n');
+                content = content.replace(oldAsync, 'export async function onRequest(context) {\n  const $2 = context.request;\n  Object.assign(globalThis.process.env, context.env);\n');
+                content = content.replace(oldSync, 'export function onRequest(context) {\n  const $2 = context.request;\n  Object.assign(globalThis.process.env, context.env);\n');
             }
+
+            // Global polyfill for top-level code (like process.env.NODE_ENV)
+            const polyfill = `if (typeof globalThis.process === 'undefined') globalThis.process = {};\nif (typeof globalThis.process.env === 'undefined') globalThis.process.env = {};\n\n`;
+            content = polyfill + content;
 
             fs.writeFileSync(destPath, content);
         } else if (entry.isFile()) {

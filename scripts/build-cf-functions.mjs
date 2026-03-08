@@ -12,6 +12,11 @@ function copyDir(src, dest) {
         const srcPath = path.join(src, entry.name);
         let newName = entry.name;
 
+        // Cloudflare Pages ignores files starting with `_`, so we strip the prefix for routes
+        if (newName.startsWith('_') && src === 'api') {
+            newName = newName.substring(1);
+        }
+
         // Convert Vercel catch-all [[...path]] semantics to Cloudflare [[path]]
         newName = newName.replace(/\[\[\.\.\.([^\]]+)\]\]/g, '[[$1]]');
         const destPath = path.join(dest, newName);
@@ -21,8 +26,11 @@ function copyDir(src, dest) {
         } else if (entry.isFile() && (entry.name.endsWith('.js') || entry.name.endsWith('.ts'))) {
             let content = fs.readFileSync(srcPath, 'utf8');
 
-            // If it's a route (doesn't start with _ and is not inside the data dir helpers)
-            if (!entry.name.startsWith('_') && src !== 'api/data') {
+            // Fix internal module imports pointing to renamed _ files
+            content = content.replace(/from\s+['"](?:\.\/|\.\.\/)_([^'"]+)['"]/g, "from './$1'");
+
+            // If it's a route (not inside the data dir helpers)
+            if (src !== 'api/data') {
                 // Remove the edge runtime config
                 content = content.replace(/export const config\s*=\s*\{[^\}]+\};\n*/g, '');
 

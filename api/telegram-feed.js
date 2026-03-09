@@ -28,23 +28,19 @@ export default async function handler(req) {
 
   let relay = process.env.WS_RELAY_URL;
   if (!relay) {
-    // No local relay configured — proxy to upstream WorldMonitor
-    try {
-      const upUrl = new URL(req.url);
-      const upstreamUrl = `https://worldmonitor.app/api/telegram-feed${upUrl.search}`;
-      const upResp = await fetchWithTimeout(upstreamUrl, {
-        headers: { 'Origin': 'https://worldmonitor.app', 'Accept': 'application/json' },
-      }, 25000);
-      const text = await upResp.text();
-      return new Response(text, {
-        status: upResp.status,
-        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=10', ...cors },
-      });
-    } catch {
-      return new Response(JSON.stringify({ error: 'Telegram feed unavailable' }), {
-        status: 502, headers: { 'Content-Type': 'application/json', ...cors },
-      });
-    }
+    // No local relay configured — return empty feed response
+    // (upstream worldmonitor.app blocks external access to telegram-feed)
+    return new Response(JSON.stringify({
+      source: 'telegram',
+      earlySignal: false,
+      enabled: false,
+      count: 0,
+      updatedAt: null,
+      items: [],
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...cors },
+    });
   }
 
   // Guard: WS_RELAY_URL should be HTTP(S) for server-side fetches.

@@ -66,7 +66,8 @@ import { updateAndCheck } from '@/services/temporal-baseline';
 import { fetchAllFires, flattenFires, computeRegionStats, toMapFires } from '@/services/wildfires';
 import { analyzeFlightsForSurge, surgeAlertToSignal, detectForeignMilitaryPresence, foreignPresenceToSignal, type TheaterPostureSummary } from '@/services/military-surge';
 import { fetchCachedTheaterPosture } from '@/services/cached-theater-posture';
-import { ingestProtestsForCII, ingestMilitaryForCII, ingestNewsForCII, ingestOutagesForCII, ingestConflictsForCII, ingestUcdpForCII, ingestHapiForCII, ingestDisplacementForCII, ingestClimateForCII, ingestStrikesForCII, ingestOrefForCII, ingestAviationForCII, ingestAdvisoriesForCII, ingestGpsJammingForCII, ingestAisDisruptionsForCII, ingestSatelliteFiresForCII, ingestCyberThreatsForCII, ingestTemporalAnomaliesForCII, isInLearningMode } from '@/services/country-instability';
+import { ingestProtestsForCII, ingestMilitaryForCII, ingestNewsForCII, ingestOutagesForCII, ingestConflictsForCII, ingestUcdpForCII, ingestHapiForCII, ingestDisplacementForCII, ingestClimateForCII, ingestStrikesForCII, ingestAviationForCII, ingestAdvisoriesForCII, ingestGpsJammingForCII, ingestAisDisruptionsForCII, ingestSatelliteFiresForCII, ingestCyberThreatsForCII, ingestTemporalAnomaliesForCII, isInLearningMode } from '@/services/country-instability';
+
 import { fetchGpsInterference } from '@/services/gps-interference';
 import { dataFreshness, type DataSourceId } from '@/services/data-freshness';
 import { fetchConflictEvents, fetchUcdpClassifications, fetchHapiSummary, fetchUcdpEvents, deduplicateAgainstAcled, fetchIranEvents } from '@/services/conflict';
@@ -74,7 +75,12 @@ import { fetchUnhcrPopulation } from '@/services/displacement';
 import { fetchClimateAnomalies } from '@/services/climate';
 import { fetchSecurityAdvisories } from '@/services/security-advisories';
 import { fetchTelegramFeed } from '@/services/telegram-intel';
-import { fetchOrefAlerts, startOrefPolling, stopOrefPolling, onOrefAlertsUpdate } from '@/services/oref-alerts';
+import {
+  fetchCyberThreats as fetchCyberThreatsService,
+  startCyberThreatsPolling,
+  stopCyberThreatsPolling,
+  onCyberThreatsUpdate,
+} from '@/services/cyber-threats';
 import { enrichEventsWithExposure } from '@/services/population-exposure';
 import { debounce, getCircuitBreakerCooldownInfo } from '@/utils';
 import { isFeatureAvailable, isFeatureEnabled } from '@/services/runtime-config';
@@ -108,7 +114,7 @@ import {
   TradePolicyPanel,
   SupplyChainPanel,
   SecurityAdvisoriesPanel,
-  OrefSirensPanel,
+  CyberThreatsPanel,
   TelegramIntelPanel,
 } from '@/components';
 import { SatelliteFiresPanel } from '@/components/SatelliteFiresPanel';
@@ -172,7 +178,7 @@ export class DataLoaderManager implements AppModule {
     this.applyTimeRangeFilterToNewsPanels();
   }, 120);
 
-  public updateSearchIndex: () => void = () => {};
+  public updateSearchIndex: () => void = () => { };
 
   private digestBreaker = { state: 'closed' as 'closed' | 'open' | 'half-open', failures: 0, cooldownUntil: 0 };
   private readonly digestRequestTimeoutMs = 8000;
@@ -188,10 +194,10 @@ export class DataLoaderManager implements AppModule {
     this.callbacks = callbacks;
   }
 
-  init(): void {}
+  init(): void { }
 
   destroy(): void {
-    stopOrefPolling();
+    stopCyberThreatsPolling();
   }
 
   private async tryFetchDigest(): Promise<ListFeedDigestResponse | null> {
@@ -229,7 +235,7 @@ export class DataLoaderManager implements AppModule {
   }
 
   private persistDigest(data: ListFeedDigestResponse): void {
-    setPersistentCache('digest:last-good', data).catch(() => {});
+    setPersistentCache('digest:last-good', data).catch(() => { });
   }
 
   private async loadPersistedDigest(): Promise<ListFeedDigestResponse | null> {
@@ -582,7 +588,7 @@ export class DataLoaderManager implements AppModule {
               item.threat = ai;
               item.isAlert = ai.level === 'critical' || ai.level === 'high';
             }
-          }).catch(() => {});
+          }).catch(() => { });
         }
 
         checkBatchForBreakingAlerts(items);
@@ -1199,7 +1205,7 @@ export class DataLoaderManager implements AppModule {
         };
         fetchUSNIFleetReport().then((report) => {
           if (report) this.ctx.intelligenceCache.usniFleet = report;
-        }).catch(() => {});
+        }).catch(() => { });
         ingestFlights(flightData.flights);
         ingestVessels(vesselData.vessels);
         ingestMilitaryForCII(flightData.flights, vesselData.vessels);
@@ -1319,23 +1325,15 @@ export class DataLoaderManager implements AppModule {
     // Telegram Intel
     tasks.push(this.loadTelegramIntel());
 
-    // OREF sirens
+    // Cyber Threats
     tasks.push((async () => {
       try {
-        const data = await fetchOrefAlerts();
-        (this.ctx.panels['oref-sirens'] as OrefSirensPanel)?.setData(data);
-        const alertCount = data.alerts?.length ?? 0;
-        const historyCount24h = data.historyCount24h ?? 0;
-        ingestOrefForCII(alertCount, historyCount24h);
-        this.ctx.intelligenceCache.orefAlerts = { alertCount, historyCount24h };
-        onOrefAlertsUpdate((update) => {
-          (this.ctx.panels['oref-sirens'] as OrefSirensPanel)?.setData(update);
-          const updAlerts = update.alerts?.length ?? 0;
-          const updHistory = update.historyCount24h ?? 0;
-          ingestOrefForCII(updAlerts, updHistory);
-          this.ctx.intelligenceCache.orefAlerts = { alertCount: updAlerts, historyCount24h: updHistory };
+        const data = await fetchCyberThreatsService();
+        (this.ctx.panels['cyber-threats'] as CyberThreatsPanel)?.setData(data);
+        onCyberThreatsUpdate((update) => {
+          (this.ctx.panels['cyber-threats'] as CyberThreatsPanel)?.setData(update);
         });
-        startOrefPolling();
+        startCyberThreatsPolling();
       } catch (error) {
         console.error('[Intelligence] OREF alerts fetch failed:', error);
       }
@@ -1672,7 +1670,7 @@ export class DataLoaderManager implements AppModule {
       };
       fetchUSNIFleetReport().then((report) => {
         if (report) this.ctx.intelligenceCache.usniFleet = report;
-      }).catch(() => {});
+      }).catch(() => { });
       this.ctx.map?.setMilitaryFlights(flightData.flights, flightData.clusters);
       this.ctx.map?.setMilitaryVessels(vesselData.vessels, vesselData.clusters);
       ingestFlights(flightData.flights);
@@ -2154,7 +2152,7 @@ export class DataLoaderManager implements AppModule {
     setPersistentCache(
       DataLoaderManager.HAPPY_ITEMS_CACHE_KEY,
       this.ctx.happyAllItems.map(item => ({ ...item, pubDate: item.pubDate.getTime() }))
-    ).catch(() => {});
+    ).catch(() => { });
   }
 
   private async loadPositiveEvents(): Promise<void> {

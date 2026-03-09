@@ -34,7 +34,7 @@ import {
   TradePolicyPanel,
   SupplyChainPanel,
   SecurityAdvisoriesPanel,
-  OrefSirensPanel,
+  CyberThreatsPanel,
   TelegramIntelPanel,
   DummyPanel,
 } from '@/components';
@@ -640,8 +640,8 @@ export class PanelLayoutManager implements AppModule {
       });
       this.ctx.panels['security-advisories'] = securityAdvisoriesPanel;
 
-      const orefSirensPanel = new OrefSirensPanel();
-      this.ctx.panels['oref-sirens'] = orefSirensPanel;
+      const cyberThreatsPanel = new CyberThreatsPanel();
+      this.ctx.panels['cyber-threats'] = cyberThreatsPanel;
 
       const telegramIntelPanel = new TelegramIntelPanel();
       this.ctx.panels['telegram-intel'] = telegramIntelPanel;

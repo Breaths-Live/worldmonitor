@@ -54,7 +54,7 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   climate: { name: 'Climate Anomalies', enabled: true, priority: 2 },
   'population-exposure': { name: 'Population Exposure', enabled: true, priority: 2 },
   'security-advisories': { name: 'Security Advisories', enabled: true, priority: 2 },
-  'oref-sirens': { name: 'Israel Sirens', enabled: true, priority: 2 },
+  'cyber-threats': { name: 'Cyber Threats', enabled: true, priority: 6 },
   'telegram-intel': { name: 'Telegram Intel', enabled: true, priority: 2 },
 };
 
@@ -795,7 +795,7 @@ export const PANEL_CATEGORY_MAP: Record<string, { labelKey: string; panelKeys: s
   },
   dataTracking: {
     labelKey: 'header.panelCatDataTracking',
-    panelKeys: ['monitors', 'satellite-fires', 'ucdp-events', 'displacement', 'climate', 'population-exposure', 'security-advisories', 'oref-sirens', 'world-clock'],
+    panelKeys: ['monitors', 'satellite-fires', 'ucdp-events', 'displacement', 'climate', 'population-exposure', 'security-advisories', 'cyber-threats', 'world-clock'],
     variants: ['full'],
   },
 

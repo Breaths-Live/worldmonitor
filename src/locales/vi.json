@@ -208,7 +208,7 @@
     "geoHubs": "Trung tâm Địa chính trị",
     "liveWebcams": "Webcam Trực tiếp",
     "securityAdvisories": "Cảnh báo An ninh",
-    "orefSirens": "Israel Sirens",
+    "cyberThreats": "Mối Đe Dọa Mạng",
     "telegramIntel": "Tình báo Telegram"
   },
   "modals": {
@@ -1334,16 +1334,13 @@
       },
       "infoTooltip": "<strong>Cảnh báo An ninh</strong><br>Cảnh báo du lịch và an ninh từ các cơ quan chính phủ."
     },
-    "orefSirens": {
-      "checking": "Checking siren alerts...",
-      "noAlerts": "No active sirens — all clear",
-      "notConfigured": "Sirens service not configured",
-      "activeSirens": "{{count}} active siren(s)",
-      "area": "Area",
-      "time": "Time",
-      "justNow": "just now",
-      "historyCount": "{{count}} alerts in last 24h",
-      "infoTooltip": "<strong>Israel Sirens</strong><br>Real-time rocket and missile siren alerts from Israel Home Front Command.<br><br>Data is polled every 10 seconds. A pulsing red indicator means active sirens are sounding."
+    "cyberThreats": {
+      "checking": "Đang kiểm tra mối đe dọa mới nhất...",
+      "noAlerts": "Không phát hiện mối đe dọa",
+      "notConfigured": "Dịch vụ đe dọa mạng không khả dụng",
+      "activeAlerts": "{{count}} cảnh báo mới",
+      "justNow": "vừa xong",
+      "infoTooltip": "<strong>Mối Đe Dọa Mạng</strong><br>Cảnh báo an ninh mạng thời gian thực, lỗ hổng zero-day và cảnh báo rò rỉ dữ liệu.<br><br>Nguồn dữ liệu từ CISA (Hoa Kỳ) và The Hacker News."
     }
   },
   "popups": {

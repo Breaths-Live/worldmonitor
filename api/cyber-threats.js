@@ -57,7 +57,7 @@ function parseRss(xmlText, sourceName) {
 
         if (title && link) {
             // Create a deterministic ID
-            const id = 'cyb_' + Buffer.from(link).toString('base64').substring(0, 16);
+            const id = 'cyb_' + btoa(link).substring(0, 16);
 
             let ts = new Date().getTime();
             try {

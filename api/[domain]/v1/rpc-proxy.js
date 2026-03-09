@@ -5,18 +5,18 @@
  * WorldMonitor server since the original TypeScript handlers require
  * a full bundler (Vercel) that Cloudflare Pages doesn't provide.
  *
- * This replaces the complex api/[domain]/v1/[rpc].ts at build time.
+ * Auth is handled by the upstream server — we only add CORS headers
+ * and forward the Origin so the upstream can validate trusted origins.
  */
 
 import { getCorsHeaders, isDisallowedOrigin } from '../../_cors.js';
-import { validateApiKey } from '../../_api-key.js';
 
 export const config = { runtime: 'edge' };
 
 const UPSTREAM = 'https://worldmonitor.app';
 
 export default async function handler(req) {
-    // CORS / origin check
+    // Block disallowed origins
     if (isDisallowedOrigin(req))
         return new Response('Forbidden', { status: 403 });
 
@@ -24,28 +24,25 @@ export default async function handler(req) {
     if (req.method === 'OPTIONS')
         return new Response(null, { status: 204, headers: cors });
 
-    const apiKeyResult = validateApiKey(req);
-    if (apiKeyResult.required && !apiKeyResult.valid)
-        return new Response(JSON.stringify({ error: apiKeyResult.error }), {
-            status: 401, headers: { ...cors, 'Content-Type': 'application/json' },
-        });
-
-    // Forward the request to upstream
+    // Forward the request to upstream, passing Origin so upstream can authenticate
     const url = new URL(req.url);
     const upstreamUrl = `${UPSTREAM}${url.pathname}${url.search}`;
 
     try {
+        const fwdHeaders = {
+            'User-Agent': 'WorldMonitor-Proxy/1.0',
+            'Accept': 'application/json',
+            // Forward browser's Origin so upstream trusts same-origin requests
+            'Origin': 'https://worldmonitor.app',
+        };
+
         const upstreamResp = await fetch(upstreamUrl, {
             method: req.method,
-            headers: {
-                'User-Agent': 'WorldMonitor-Proxy/1.0',
-                'Accept': 'application/json',
-            },
-            // Forward body for POST requests
+            headers: fwdHeaders,
             body: req.method === 'POST' ? req.body : undefined,
         });
 
-        // Stream the response back
+        // Stream the response back with our CORS headers
         const respHeaders = {
             ...cors,
             'Content-Type': upstreamResp.headers.get('Content-Type') || 'application/json',

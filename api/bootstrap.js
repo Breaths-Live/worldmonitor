@@ -4,21 +4,21 @@ import { validateApiKey } from './_api-key.js';
 export const config = { runtime: 'edge' };
 
 const BOOTSTRAP_CACHE_KEYS = {
-  earthquakes:      'seismology:earthquakes:v1',
-  outages:          'infra:outages:v1',
-  serviceStatuses:  'infra:service-statuses:v1',
-  sectors:          'market:sectors:v1',
-  etfFlows:         'market:etf-flows:v1',
-  macroSignals:     'economic:macro-signals:v1',
-  bisPolicy:        'economic:bis:policy:v1',
-  bisExchange:      'economic:bis:eer:v1',
-  bisCredit:        'economic:bis:credit:v1',
-  shippingRates:    'supply_chain:shipping:v2',
-  chokepoints:      'supply_chain:chokepoints:v1',
-  minerals:         'supply_chain:minerals:v1',
-  giving:           'giving:summary:v1',
+  earthquakes: 'seismology:earthquakes:v1',
+  outages: 'infra:outages:v1',
+  serviceStatuses: 'infra:service-statuses:v1',
+  sectors: 'market:sectors:v1',
+  etfFlows: 'market:etf-flows:v1',
+  macroSignals: 'economic:macro-signals:v1',
+  bisPolicy: 'economic:bis:policy:v1',
+  bisExchange: 'economic:bis:eer:v1',
+  bisCredit: 'economic:bis:credit:v1',
+  shippingRates: 'supply_chain:shipping:v2',
+  chokepoints: 'supply_chain:chokepoints:v1',
+  minerals: 'supply_chain:minerals:v1',
+  giving: 'giving:summary:v1',
   climateAnomalies: 'climate:anomalies:v1',
-  wildfires:        'wildfire:fires:v1',
+  wildfires: 'wildfire:fires:v1',
 };
 
 const NEG_SENTINEL = '__WM_NEG__';
@@ -95,6 +95,28 @@ export default async function handler(req) {
     const val = cached.get(keys[i]);
     if (val !== undefined) data[names[i]] = val;
     else missing.push(names[i]);
+  }
+
+  // If local cache returned nothing, proxy to upstream
+  if (Object.keys(data).length === 0) {
+    try {
+      const upstreamUrl = `https://worldmonitor.app/api/bootstrap${url.search}`;
+      const upstreamResp = await fetch(upstreamUrl, {
+        headers: { 'User-Agent': 'WorldMonitor-Proxy/1.0', 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(5000),
+      });
+      if (upstreamResp.ok) {
+        const upstreamData = await upstreamResp.json();
+        return new Response(JSON.stringify(upstreamData), {
+          status: 200,
+          headers: {
+            ...cors,
+            'Content-Type': 'application/json',
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+          },
+        });
+      }
+    } catch { /* upstream failed, return local empty result */ }
   }
 
   return new Response(JSON.stringify({ data, missing }), {

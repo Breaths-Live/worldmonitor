@@ -26,8 +26,8 @@ function copyDir(src, dest) {
         } else if (entry.isFile() && (entry.name.endsWith('.js') || entry.name.endsWith('.ts'))) {
             let content = fs.readFileSync(srcPath, 'utf8');
 
-            // Fix internal module imports pointing to renamed _ files
-            content = content.replace(/from\s+['"](?:\.\/|\.\.\/)_([^'"]+)['"]/g, "from './$1'");
+            // Fix internal module imports pointing to renamed _ files (preserve ../ vs ./ prefix)
+            content = content.replace(/from\s+['"](\.\/|\.\.\/|\.\.\/\.\.\/?)_([^'"]+)['"]/g, "from '$1$2'");
 
             // If it's a route (not inside the data dir helpers)
             if (src !== 'api/data') {

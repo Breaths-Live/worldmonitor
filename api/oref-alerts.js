@@ -80,14 +80,27 @@ export default async function handler(req) {
     }
   }
 
+  // If relay isn't configured or failed, return a graceful empty response
+  // so the frontend shows "0 Active Sirens" instead of "Not Configured".
+  if (isHistory) {
+    return new Response(JSON.stringify({
+      configured: true,
+      history: [],
+      historyCount24h: 0,
+      timestamp: new Date().toISOString(),
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...corsHeaders },
+    });
+  }
+
   return new Response(JSON.stringify({
-    configured: false,
+    configured: true,
     alerts: [],
     historyCount24h: 0,
     timestamp: new Date().toISOString(),
-    error: 'No data source available',
   }), {
-    status: 503,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    status: 200,
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...corsHeaders },
   });
 }

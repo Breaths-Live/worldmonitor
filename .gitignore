@@ -45,3 +45,9 @@ GUIDE-*
 cloudflare_env_vars*
 
 functions/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example

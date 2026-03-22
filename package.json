@@ -23,7 +23,7 @@
     "typecheck:api": "tsc --noEmit -p tsconfig.api.json",
     "typecheck:all": "tsc --noEmit && tsc --noEmit -p tsconfig.api.json",
     "tauri": "tauri",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler dev",
     "test:e2e:full": "cross-env VITE_VARIANT=full playwright test",
     "test:e2e:tech": "cross-env VITE_VARIANT=tech playwright test",
     "test:e2e:finance": "cross-env VITE_VARIANT=finance playwright test",
@@ -51,9 +51,11 @@
     "desktop:package:windows:full:sign": "node scripts/desktop-package.mjs --os windows --variant full --sign",
     "desktop:package:windows:tech:sign": "node scripts/desktop-package.mjs --os windows --variant tech --sign",
     "desktop:package": "node scripts/desktop-package.mjs",
-    "sync-links": "node scripts/sync-aff-links.mjs"
+    "sync-links": "node scripts/sync-aff-links.mjs",
+    "deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.26.1",
     "@playwright/test": "^1.52.0",
     "@tauri-apps/cli": "^2.10.0",
     "@types/canvas-confetti": "^1.9.0",
@@ -69,7 +71,8 @@
     "tsx": "^4.21.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
-    "vite-plugin-pwa": "^1.2.0"
+    "vite-plugin-pwa": "^1.2.0",
+    "wrangler": "^4.71.0"
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "^9.2.6",
